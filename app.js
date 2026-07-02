@@ -41,6 +41,70 @@ let cfg = {};
 try { cfg = JSON.parse(localStorage.getItem(CFG_KEY)) || {}; } catch(e) {}
 function saveCfg() { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
 
+/* ─────────────── QR CODE DE CONFIGURATION ─────────────── */
+/* Génère un QR code contenant l'URL de l'app + clé API + binId.
+   Scanner depuis le Quest Browser configure l'app automatiquement.
+   Utilise la lib QRCode.js chargée depuis CDN dans index.html.     */
+
+function buildConfigURL() {
+  const base = window.location.href.split('?')[0];
+  const params = new URLSearchParams();
+  if (cfg.apiKey)  params.set('k', cfg.apiKey);
+  if (cfg.binId)   params.set('b', cfg.binId);
+  if (cfg.patientName) params.set('n', cfg.patientName);
+  return base + '?' + params.toString();
+}
+
+async function showQRModal() {
+  const url = buildConfigURL();
+  const modal = document.createElement('div');
+  modal.id = 'qr-modal';
+  modal.innerHTML = `
+    <div class="qr-overlay" id="qr-overlay">
+      <div class="qr-box">
+        <div class="qr-title">📱 → 🥽 Scanner depuis le Quest</div>
+        <div class="qr-sub">Ouvrez l'appareil photo ou le navigateur Quest et scannez ce QR code.<br>La configuration se transfère automatiquement.</div>
+        <div id="qr-canvas-wrap"></div>
+        <div class="qr-url">${url.length > 80 ? url.slice(0,77)+'…' : url}</div>
+        <div class="qr-hint">⚠️ Ce QR contient votre clé API — ne le partagez qu'avec vos appareils personnels.</div>
+        <button class="btn btn-secondary" id="qr-close-btn" style="margin-top:16px;">Fermer</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  document.getElementById('qr-close-btn').addEventListener('click', () => modal.remove());
+  document.getElementById('qr-overlay').addEventListener('click', (e) => { if(e.target.id==='qr-overlay') modal.remove(); });
+
+  const wrap = document.getElementById('qr-canvas-wrap');
+  try {
+    new QRCode(wrap, {
+      text: url,
+      width: 220, height: 220,
+      colorDark: '#00C9A7',
+      colorLight: '#0F1E38',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } catch(e) {
+    wrap.innerHTML = '<div style="color:#FF6B6B;font-size:.8rem;padding:20px;">Lib QRCode non chargée.<br>Vérifiez la connexion internet.</div>';
+  }
+}
+
+/* Lecture des paramètres URL au démarrage (pour le Quest qui scanne le QR) */
+function applyURLParams() {
+  const params = new URLSearchParams(window.location.search);
+  let changed = false;
+  if (params.get('k')) { cfg.apiKey = params.get('k'); changed=true; }
+  if (params.get('b')) { cfg.binId  = params.get('b'); changed=true; }
+  if (params.get('n')) { cfg.patientName = params.get('n'); changed=true; }
+  if (changed) {
+    saveCfg();
+    // Nettoyer l'URL (retirer les params pour ne pas les exposer dans l'historique)
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+  return changed;
+}
+
+
+
 /* ─────────────── STRUCTURE DE DONNÉES ─────────────── */
 function emptyStore() {
   return {
@@ -202,6 +266,14 @@ function renderConfig() {
   const hasKey = !!cfg.apiKey;
   $('cfg-status').textContent  = hasKey ? '✓ Clé enregistrée — synchronisation cloud active' : 'Aucune clé — toutes les données sont sauvegardées localement sur cet appareil';
   $('cfg-status').className = 'cfg-status ' + (hasKey ? 'ok' : 'neutral');
+}
+
+// Bouton QR code
+if ($('cfg-qr-btn')) {
+  $('cfg-qr-btn').addEventListener('click', () => {
+    if (!cfg.apiKey) { alert("Enregistrez d'abord votre clé API."); return; }
+    showQRModal();
+  });
 }
 
 $('cfg-save-btn').addEventListener('click', async () => {
@@ -841,8 +913,11 @@ function showNotice(msg) {
 
 /* ─────────────── INIT ─────────────── */
 async function init() {
+  // Appliquer les paramètres URL si l'app a été ouverte via QR code
+  const configuredByQR = applyURLParams();
+
   // Décider quel écran montrer au démarrage
-  if (!cfg.patientName) {
+  if (!cfg.patientName && !configuredByQR) {
     // Premier lancement : écran config
     renderConfig();
     showScreen('config');

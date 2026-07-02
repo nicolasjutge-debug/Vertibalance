@@ -221,6 +221,31 @@ footer{text-align:center;padding:16px 22px;color:var(--muted);font-size:.67rem;
 }
 @media(max-width:440px){.grid{grid-template-columns:1fr;}}
 @media(prefers-reduced-motion:reduce){.sphere-ring,.sphere-core,.logo-dot{animation:none;}}
+/* QR MODAL */
+.qr-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.qr-box{background:var(--bg2);border:1px solid rgba(0,201,167,.3);border-radius:18px;padding:28px 24px;max-width:320px;width:90%;text-align:center;}
+.qr-title{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;margin-bottom:6px;color:var(--teal);}
+.qr-sub{font-size:.76rem;color:var(--muted);line-height:1.5;margin-bottom:16px;}
+#qr-canvas-wrap{display:flex;justify-content:center;margin-bottom:12px;border-radius:12px;overflow:hidden;background:var(--bg3);padding:10px;}
+#qr-canvas-wrap canvas,#qr-canvas-wrap img{border-radius:8px;}
+.qr-url{font-size:.62rem;color:var(--muted);word-break:break-all;background:var(--bg3);border-radius:6px;padding:6px 8px;margin-bottom:8px;}
+.qr-hint{font-size:.68rem;color:var(--warn);line-height:1.4;}
+
+/* ═══ QR MODAL ═══ */
+.qr-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.qr-box{background:var(--bg2);border:1px solid rgba(0,201,167,.3);border-radius:18px;
+  padding:28px 24px;max-width:320px;width:90%;text-align:center;}
+.qr-title{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;
+  margin-bottom:6px;color:var(--teal);}
+.qr-sub{font-size:.76rem;color:var(--muted);line-height:1.5;margin-bottom:16px;}
+#qr-canvas-wrap{display:flex;justify-content:center;margin-bottom:12px;
+  border-radius:12px;overflow:hidden;background:var(--bg3);padding:10px;}
+#qr-canvas-wrap canvas, #qr-canvas-wrap img{border-radius:8px;}
+.qr-url{font-size:.62rem;color:var(--muted);word-break:break-all;
+  background:var(--bg3);border-radius:6px;padding:6px 8px;margin-bottom:8px;}
+.qr-hint{font-size:.68rem;color:var(--warn);line-height:1.4;}
+
 </style>
 </head>
 <body>
@@ -263,6 +288,7 @@ footer{text-align:center;padding:16px 22px;color:var(--muted);font-size:.67rem;
     <div class="config-actions">
       <button class="btn btn-primary" id="cfg-save-btn">✓ Enregistrer et démarrer</button>
       <button class="btn btn-warn btn-sm" id="cfg-reset-btn">Réinitialiser config</button>
+      <button class="btn btn-secondary btn-sm" id="cfg-qr-btn">📱 QR code Quest</button>
     </div>
 
     <div class="how-to" style="margin-top:16px;">
@@ -394,6 +420,7 @@ footer{text-align:center;padding:16px 22px;color:var(--muted);font-size:.67rem;
 <canvas id="xr-canvas"></canvas>
 <div id="exit-banner">Session VR en cours — retirez le casque ou appuyez sur le bouton Meta pour revenir.</div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="app.js"></script>
 <script>
