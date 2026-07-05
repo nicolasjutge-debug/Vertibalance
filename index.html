@@ -4,20 +4,25 @@
     <meta charset="UTF-8">
     <title>VertiBalance VR - Patient</title>
     <style>
-        body { font-family: Arial; background: #0a1628; color: white; text-align: center; padding: 20px; }
+        body { font-family: Arial, sans-serif; background: #0a1628; color: white; text-align: center; padding: 50px; }
         .container { max-width: 600px; margin: 0 auto; background: #0d1d35; padding: 40px; border-radius: 12px; }
+        .btn-gen { display: inline-block; background: #00C9A7; color: #0a1628; padding: 15px 25px; text-decoration: none; font-weight: bold; border-radius: 8px; margin-top: 20px; }
     </style>
 </head>
 <body>
     <div class="container" id="app">
-        <h1>Interface Patient</h1>
-        <p>Chargement des données...</p>
+        <h1>Chargement...</h1>
     </div>
     <script>
-        if (!localStorage.getItem("VERTIBALANCE_BIN_ID")) {
-            window.location.href = "generation.html";
+        const BIN_ID = localStorage.getItem("VERTIBALANCE_BIN_ID");
+        const app = document.getElementById("app");
+        
+        if (!BIN_ID) {
+            app.innerHTML = "<h1>Bienvenue</h1><p>Aucun profil patient détecté.</p>" +
+                            "<a href='generation.html' class='btn-gen'>Initialiser le Bin Patient</a>";
         } else {
-            document.getElementById("app").innerHTML = "<h1>Interface Patient</h1><p>BIN Actif : " + localStorage.getItem("VERTIBALANCE_BIN_ID") + "</p><p>Application prête.</p>";
+            app.innerHTML = "<h1>Interface Patient</h1><p>Statut : Connecté</p>" +
+                            "<p style='font-size: 0.8em;'>ID : " + BIN_ID + "</p>";
         }
     </script>
 </body>

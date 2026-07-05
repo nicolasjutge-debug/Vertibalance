@@ -4,21 +4,23 @@
     <meta charset="UTF-8">
     <title>Configuration - VertiBalance</title>
     <style>
-        body { font-family: Arial; background: #0a1628; color: white; text-align: center; padding: 20px; }
+        body { font-family: Arial, sans-serif; background: #0a1628; color: white; text-align: center; padding: 20px; }
         .container { max-width: 500px; margin: 0 auto; background: #0d1d35; padding: 25px; border-radius: 12px; border: 2px solid #00C9A7; }
-        button { background-color: #00C9A7; color: #0a1628; border: none; padding: 15px 30px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        button { background-color: #00C9A7; color: #0a1628; border: none; padding: 15px 30px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; margin-top: 20px; }
+        a { color: #00C9A7; font-size: 1.2em; font-weight: bold; text-decoration: none; }
+        #status { margin-top: 20px; font-size: 1.1em; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Configuration</h1>
         <button id="btn-create-bin">Générer le Bin</button>
-        <div id="status" style="margin-top:20px; color:#00C9A7;"></div>
+        <div id="status"></div>
     </div>
     <script>
         document.getElementById("btn-create-bin").addEventListener("click", () => {
             const status = document.getElementById("status");
-            status.innerText = "Création...";
+            status.innerText = "Création en cours...";
             fetch("https://api.jsonbin.io/v3/b", {
                 method: "POST",
                 headers: {
@@ -31,7 +33,10 @@
             .then(r => r.json())
             .then(res => {
                 localStorage.setItem("VERTIBALANCE_BIN_ID", res.metadata.id);
-                status.innerHTML = "Configuré !<br><br><button onclick='window.location.href="index.html"'>Aller à l'Interface Patient</button>";
+                status.innerHTML = "Bin créé avec succès !<br><br><a href='index.html'>Retourner à l'Interface Patient</a>";
+            })
+            .catch(err => {
+                status.innerText = "Erreur lors de la création : " + err.message;
             });
         });
     </script>
