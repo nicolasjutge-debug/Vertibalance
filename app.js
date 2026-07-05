@@ -1,1 +1,1 @@
-console.log('App démarrée');
+console.log('App lancée');
