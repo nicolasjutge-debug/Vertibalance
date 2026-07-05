@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuration - VertiBalance</title>
+    <style>
+        body { font-family: Arial; background: #0a1628; color: white; text-align: center; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: #0d1d35; padding: 25px; border-radius: 12px; border: 2px solid #00C9A7; }
+        button { background-color: #00C9A7; color: #0a1628; border: none; padding: 15px 30px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Configuration</h1>
+        <button id="btn-create-bin">Générer le Bin</button>
+        <div id="status" style="margin-top:20px; color:#00C9A7;"></div>
+    </div>
+    <script>
+        document.getElementById("btn-create-bin").addEventListener("click", () => {
+            const status = document.getElementById("status");
+            status.innerText = "Création...";
+            fetch("https://api.jsonbin.io/v3/b", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Master-Key": "$2a$10$37WLUrV6lE8yluKasDN/nuzRMkF98j/gvrCuEj5KwNr0AuZkTPHnG",
+                    "X-Bin-Private": "true"
+                },
+                body: JSON.stringify({ status: "initialisé" })
+            })
+            .then(r => r.json())
+            .then(res => {
+                localStorage.setItem("VERTIBALANCE_BIN_ID", res.metadata.id);
+                status.innerHTML = "Configuré !<br><br><button onclick='window.location.href="index.html"'>Aller à l'Interface Patient</button>";
+            });
+        });
+    </script>
+</body>
+</html>
