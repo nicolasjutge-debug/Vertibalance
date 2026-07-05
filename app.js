@@ -1,2 +1,1 @@
-console.log("VertiBalance VR actif");
-setInterval(() => { localStorage.setItem('vr_data', Date.now()); }, 30000);
+// Votre code app.js précédent
