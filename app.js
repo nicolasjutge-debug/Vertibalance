@@ -1,5 +1,5 @@
 // ==========================================
-// CONFIGURATION JSONBIN & NAVIGATION FORCÉE
+// CONFIGURATION JSONBIN & NAVIGATION ABSOLUE
 // ==========================================
 let BIN_ID = localStorage.getItem("VERTIBALANCE_BIN_ID") || ""; 
 const MASTER_KEY = "$2a$10$37WLUrV6lE8yluKasDN/nuzRMkF98j/gvrCuEj5KwNr0AuZkTPHnG"; 
@@ -9,9 +9,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const statusDiv = document.getElementById("sync-status");
     const createBtn = document.getElementById("btn-create-bin");
 
-    // Si on est sur index.html, on ne fait rien, on laisse l'app charger
-    if (window.location.pathname.endsWith("index.html") || window.location.pathname === "/") {
-        console.log("Interface patient chargée.");
+    // Protection : si on est déjà sur index, ne pas lancer de génération
+    if (window.location.pathname.includes("index.html") || window.location.pathname === "/") {
+        console.log("Interface patient déjà active.");
         return;
     }
 
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function creerBinAutomatiquement() {
     const statusDiv = document.getElementById("sync-status");
-    statusDiv.innerText = "Création en cours...";
+    statusDiv.innerText = "Création du BIN en cours...";
 
     fetch(JSONBIN_URL, {
         method: "POST",
@@ -40,22 +40,20 @@ function creerBinAutomatiquement() {
         BIN_ID = result.metadata.id;
         localStorage.setItem("VERTIBALANCE_BIN_ID", BIN_ID);
         
-        let count = 3;
-        statusDiv.innerText = `Bin créé. Retour à l'accueil dans ${count}s...`;
-        
+        // Phase de compte à rebours
+        let count = 4;
         const interval = setInterval(() => {
             count--;
-            if (count > 0) {
-                statusDiv.innerText = `Bin créé. Retour à l'accueil dans ${count}s...`;
-            } else {
+            statusDiv.innerText = `BIN ${BIN_ID} créé. Retour vers l'Interface Patient dans ${count}s...`;
+            if (count <= 0) {
                 clearInterval(interval);
-                // Forcer le retour absolu à la racine du site
+                // Utilisation de replace pour éviter de rester dans l'historique
                 window.location.replace("index.html");
             }
         }, 1000);
     })
     .catch(err => {
-        statusDiv.innerText = "Erreur de création.";
+        statusDiv.innerText = "Erreur fatale de connexion.";
         console.error(err);
     });
 }
