@@ -2,11 +2,12 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuration - VertiBalance</title>
     <style>
         body { font-family: Arial, sans-serif; background: #0a1628; color: white; text-align: center; padding: 20px; }
         .container { max-width: 500px; margin: 0 auto; background: #0d1d35; padding: 25px; border-radius: 12px; border: 2px solid #00C9A7; }
-        button { background-color: #00C9A7; color: #0a1628; border: none; padding: 15px 30px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; margin-top: 20px; }
+        button { background-color: #00C9A7; color: #0a1628; border: none; padding: 15px 30px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 18px; margin-top: 20px; }
         a { color: #00C9A7; font-size: 1.2em; font-weight: bold; text-decoration: none; }
         #status { margin-top: 20px; font-size: 1.1em; }
     </style>
@@ -33,10 +34,10 @@
             .then(r => r.json())
             .then(res => {
                 localStorage.setItem("VERTIBALANCE_BIN_ID", res.metadata.id);
-                status.innerHTML = "Bin créé avec succès !<br><br><a href='index.html'>Retourner à l'Interface Patient</a>";
+                status.innerHTML = "Bin créé avec succès !<br><br><a href='index.html'>Accéder à l'Interface Patient</a>";
             })
             .catch(err => {
-                status.innerText = "Erreur lors de la création : " + err.message;
+                status.innerText = "Erreur : " + err.message;
             });
         });
     </script>
