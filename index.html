@@ -2,20 +2,23 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>VertiBalance VR</title>
+    <title>VertiBalance VR - Patient</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #0a1628; color: white; text-align: center; padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; background: #0d1d35; padding: 25px; border-radius: 12px; border: 2px solid #00C9A7; }
-        button { background-color: #00C9A7; color: #0a1628; border: none; padding: 15px 30px; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 20px; font-size: 16px; }
-        .status { margin-top: 20px; font-size: 1.1em; color: #00C9A7; font-weight: bold; }
+        body { font-family: Arial; background: #0a1628; color: white; text-align: center; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #0d1d35; padding: 40px; border-radius: 12px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>VertiBalance VR</h1>
-        <button id="btn-create-bin">Générer et configurer le Bin</button>
-        <div id="sync-status" class="status"></div>
+    <div class="container" id="app">
+        <h1>Interface Patient</h1>
+        <p>Chargement des données...</p>
     </div>
-    <script src="app.js?v=1.0.11"></script>
+    <script>
+        if (!localStorage.getItem("VERTIBALANCE_BIN_ID")) {
+            window.location.href = "generation.html";
+        } else {
+            document.getElementById("app").innerHTML = "<h1>Interface Patient</h1><p>BIN Actif : " + localStorage.getItem("VERTIBALANCE_BIN_ID") + "</p><p>Application prête.</p>";
+        }
+    </script>
 </body>
 </html>
