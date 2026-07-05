@@ -248,8 +248,11 @@ function showShareModal(){
         <div class="share-divider">ou</div>
 
         <div id="qr-canvas-wrap" style="display:flex;justify-content:center;margin:10px 0;"></div>
-        <div style="font-size:.68rem;color:var(--muted);">QR code (scanner depuis le Quest Browser)</div>
-
+        <div style="font-size:.68rem;color:var(--muted);margin-bottom:8px;">QR code (scanner depuis le Quest Browser)</div>
+        <div class="qr-url-box">
+          <div class="qr-url-text">${url.length>60?url.slice(0,57)+'…':url}</div>
+          <button class="qr-copy-btn" id="qr-copy-btn">Copier</button>
+        </div>
         ${!hasKey?'<div class="share-hint-nokey">⚠️ Aucune clé API saisie — seul le nom sera transféré.</div>':''}
         <div class="qr-hint" style="margin-top:8px;">Contient votre clé API — usage personnel uniquement.</div>
         <button class="btn btn-secondary btn-sm" id="share-close-btn" style="margin-top:12px;">Fermer</button>
@@ -280,6 +283,24 @@ function showShareModal(){
     });
   }catch(e){
     $('qr-canvas-wrap').innerHTML='<div style="color:#FF6B6B;font-size:.75rem;padding:10px;">QRCode.js non chargé.</div>';
+  }
+  // Bouton copier URL
+  const copyBtn=document.getElementById('qr-copy-btn');
+  if(copyBtn){
+    copyBtn.addEventListener('click',()=>{
+      navigator.clipboard.writeText(url).then(()=>{
+        copyBtn.textContent='✓ Copié !';
+        setTimeout(()=>{copyBtn.textContent='Copier';},2000);
+      }).catch(()=>{
+        // Fallback pour Quest Browser
+        const ta=document.createElement('textarea');
+        ta.value=url;ta.style.position='fixed';ta.style.opacity='0';
+        document.body.appendChild(ta);ta.select();
+        document.execCommand('copy');document.body.removeChild(ta);
+        copyBtn.textContent='✓ Copié !';
+        setTimeout(()=>{copyBtn.textContent='Copier';},2000);
+      });
+    });
   }
 }
 
