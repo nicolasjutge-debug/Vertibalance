@@ -1,5 +1,5 @@
 // ==========================================
-// CONFIGURATION JSONBIN & REDIRECTION
+// CONFIGURATION JSONBIN & NAVIGATION
 // ==========================================
 let BIN_ID = localStorage.getItem("VERTIBALANCE_BIN_ID") || ""; 
 const MASTER_KEY = "$2a$10$37WLUrV6lE8yluKasDN/nuzRMkF98j/gvrCuEj5KwNr0AuZkTPHnG"; 
@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (BIN_ID) {
         statusDiv.innerText = `Connecté au Bin : ${BIN_ID}`;
-        // Redirection automatique rapide vers index.html après chargement
-        setTimeout(() => { window.location.href = "index.html"; }, 1500);
+        // Redirection immédiate si déjà connecté
+        setTimeout(() => { window.location.href = "index.html"; }, 1000);
     }
 
     if (createBtn) {
@@ -39,11 +39,22 @@ function creerBinAutomatiquement() {
     .then(result => {
         BIN_ID = result.metadata.id;
         localStorage.setItem("VERTIBALANCE_BIN_ID", BIN_ID);
-        statusDiv.innerText = `Bin créé : ${BIN_ID}. Redirection vers l'accueil...`;
         
-        // Redirection automatique vers index.html après 3 secondes
-        setTimeout(() => {
-            window.location.href = "index.html";
-        }, 3000);
+        let count = 3;
+        statusDiv.innerText = `Bin créé : ${BIN_ID}. Retour à l'interface dans ${count}s...`;
+        
+        const interval = setInterval(() => {
+            count--;
+            if (count > 0) {
+                statusDiv.innerText = `Bin créé : ${BIN_ID}. Retour à l'interface dans ${count}s...`;
+            } else {
+                clearInterval(interval);
+                window.location.href = "index.html"; // Retour forcé
+            }
+        }, 1000);
+    })
+    .catch(err => {
+        statusDiv.innerText = "Erreur de création. Réessayez.";
+        console.error(err);
     });
 }
