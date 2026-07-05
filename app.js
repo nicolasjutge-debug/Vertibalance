@@ -1,5 +1,5 @@
 // ==========================================
-// CONFIGURATION JSONBIN & NAVIGATION
+// CONFIGURATION JSONBIN & NAVIGATION FORCÉE
 // ==========================================
 let BIN_ID = localStorage.getItem("VERTIBALANCE_BIN_ID") || ""; 
 const MASTER_KEY = "$2a$10$37WLUrV6lE8yluKasDN/nuzRMkF98j/gvrCuEj5KwNr0AuZkTPHnG"; 
@@ -9,10 +9,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const statusDiv = document.getElementById("sync-status");
     const createBtn = document.getElementById("btn-create-bin");
 
-    if (BIN_ID) {
-        statusDiv.innerText = `Connecté au Bin : ${BIN_ID}`;
-        // Redirection immédiate si déjà connecté
-        setTimeout(() => { window.location.href = "index.html"; }, 1000);
+    // Si on est sur index.html, on ne fait rien, on laisse l'app charger
+    if (window.location.pathname.endsWith("index.html") || window.location.pathname === "/") {
+        console.log("Interface patient chargée.");
+        return;
     }
 
     if (createBtn) {
@@ -41,20 +41,21 @@ function creerBinAutomatiquement() {
         localStorage.setItem("VERTIBALANCE_BIN_ID", BIN_ID);
         
         let count = 3;
-        statusDiv.innerText = `Bin créé : ${BIN_ID}. Retour à l'interface dans ${count}s...`;
+        statusDiv.innerText = `Bin créé. Retour à l'accueil dans ${count}s...`;
         
         const interval = setInterval(() => {
             count--;
             if (count > 0) {
-                statusDiv.innerText = `Bin créé : ${BIN_ID}. Retour à l'interface dans ${count}s...`;
+                statusDiv.innerText = `Bin créé. Retour à l'accueil dans ${count}s...`;
             } else {
                 clearInterval(interval);
-                window.location.href = "index.html"; // Retour forcé
+                // Forcer le retour absolu à la racine du site
+                window.location.replace("index.html");
             }
         }, 1000);
     })
     .catch(err => {
-        statusDiv.innerText = "Erreur de création. Réessayez.";
+        statusDiv.innerText = "Erreur de création.";
         console.error(err);
     });
 }
