@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VertiBalance VR</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0a1628;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #0d1d35;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #00C9A7;
+        }
+        button {
+            background-color: #00C9A7;
+            color: #0a1628;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #00e0ba;
+        }
+        .status {
+            margin-top: 15px;
+            font-style: italic;
+            color: #2979ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>VertiBalance VR</h1>
+        <p>Si aucun Bin n'est configuré, cliquez ci-dessous pour en créer un automatiquement.</p>
+        <button id="btn-create-bin">Créer un Bin automatiquement</button>
+        <div id="sync-status" class="status">Vérification de la configuration...</div>
+    </div>
+    <script src="app.js?v=1.0.5"></script>
+</body>
+</html>
