@@ -5,91 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VertiBalance VR</title>
     <link rel="manifest" href="manifest.json">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0a1628; color: #E8F4F8; margin: 0; padding: 20px; }
-        .screen { display: none; }
-        .screen.active { display: block; }
-        input, button { margin: 5px 0; padding: 12px; font-size: 16px; border-radius: 8px; border: none; width: 100%; box-sizing: border-box; }
-        input { background: #162440; color: white; border: 1px solid #3b82f6; }
-        button { background-color: #00C9A7; color: #0a1628; font-weight: bold; cursor: pointer; }
-        button:disabled { background-color: #333; color: #777; cursor: not-allowed; }
-        #xr-canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
-        .exercise-item { padding: 15px; margin: 10px 0; background: #162440; border-radius: 8px; cursor: pointer; border-left: 4px solid #3b82f6; }
-        .exercise-item.done { opacity: 0.5; border-left-color: #00C9A7; }
-        .cfg-status { font-size: 14px; margin: 10px 0; font-weight: bold; }
-        .ok { color: #00C9A7; }
-        .neutral { color: #FFB347; }
-        .section-title { font-size: 1.2rem; color: #00C9A7; margin-top: 20px; border-bottom: 1px solid #162440; padding-bottom: 5px; }
-        #exit-banner { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100; background: #FF6B6B; color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; }
-    </style>
 </head>
 <body>
-    <div id="config" class="screen active">
-        <h2 style="color: #00C9A7;">VertiBalance VR</h2>
-        <p>Configuration de l'utilisateur</p>
-        <input type="text" id="cfg-name" placeholder="Nom du patient ou Identifiant">
-        <input type="text" id="cfg-api-key" placeholder="Clé Master JSONBin (Optionnel)">
-        <div id="cfg-status" class="cfg-status">Vérification de la clé...</div>
-        <button id="cfg-save-btn">Enregistrer & Connecter</button>
-        <button id="cfg-skip-btn" style="background-color: #3b82f6; color: white;">Continuer sans clé (Mode Local)</button>
-        <button id="cfg-share-btn" style="background-color: #7b61ff; color: white;">Transférer vers le Casque VR</button>
-        <button id="cfg-reset-btn" style="background-color: transparent; color: #FF6B6B; border: 1px solid #FF6B6B;">Réinitialiser la configuration</button>
-    </div>
-    <div id="dashboard" class="screen">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin: 0;">Patient : <span id="patient-name-label" style="color: #00C9A7;"></span></h2>
-            <button id="open-config-from-dash" style="width: auto; padding: 8px 12px; font-size: 14px;">⚙️ Réglages</button>
-        </div>
-        <div id="session-badge" style="background: #3b82f6; display: inline-block; padding: 5px 10px; border-radius: 5px; margin-top: 10px; font-size: 14px;"></div>
-        <div id="total-sessions-label" style="font-size: 12px; color: #888; margin-top: 5px;"></div>
-        <div style="font-size: 12px; margin-top: 5px; display: flex; align-items: center; gap: 5px;">
-            Statut : <span id="sync-label-dash"></span> <div class="sync-dot"></div>
-        </div>
-        <div class="section-title">Progression de la séance</div>
-        <p>Exercices terminés : <span id="stat-completed" style="font-weight: bold;"></span></p>
-        <div style="background:#162440; height:12px; width:100%; border-radius: 6px; overflow: hidden;">
-            <div id="progress-fill" style="background:#00C9A7; height:100%; width:0%; transition: width 0.3s ease;"></div>
-        </div>
-        <p style="text-align: right; font-size: 12px; margin-top: 5px;"><span id="progress-pct">0%</span></p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; text-align: center; margin-bottom: 20px;">
-            <div style="background: #162440; padding: 10px; border-radius: 8px;">
-                <div style="font-size: 10px; color: #888;">Stabilité</div>
-                <div id="stat-stability" style="font-size: 18px; font-weight: bold; color: #00C9A7;"></div>
-            </div>
-            <div style="background: #162440; padding: 10px; border-radius: 8px;">
-                <div style="font-size: 10px; color: #888;">Score DHI</div>
-                <div id="stat-dhi" style="font-size: 18px; font-weight: bold; color: #FFB347;"></div>
-            </div>
-            <div style="background: #162440; padding: 10px; border-radius: 8px;">
-                <div style="font-size: 10px; color: #888;">Meilleur</div>
-                <div id="stat-best" style="font-size: 18px; font-weight: bold; color: #7b61ff;"></div>
-            </div>
-        </div>
-        <div class="section-title">Liste des exercices</div>
-        <div id="exercises-list"></div>
-        <button id="enter-vr-btn" style="margin-top: 20px; padding: 15px; font-size: 18px;">Lancer la réalité virtuelle 🥽</button>
-        <button id="new-session-btn" style="background: transparent; border: 1px solid #3b82f6; color: #3b82f6;">Clôturer & Démarrer une nouvelle séance</button>
-        <button id="export-btn" style="background: #2a3a5a; color: white;">Exporter les données (JSON)</button>
-        <button id="export-btn-bottom" style="display:none;"></button>
-        <div id="blind-report" style="margin-top: 20px; display:none;"></div>
-        <div id="history-section" style="margin-top: 20px; display:none;"></div>
-    </div>
-    <div id="vr-screen" class="screen">
-        <button id="back-to-dashboard" style="background: #162440; color: white; margin-bottom: 20px;">← Revenir au tableau de bord</button>
-        <h2 id="vr-exercise-name" style="color: #00C9A7;"></h2>
-        <p id="vr-exercise-desc" style="background: #162440; padding: 15px; border-radius: 8px; line-height: 1.5;"></p>
-        <div style="margin: 20px 0; padding: 15px; border: 1px solid #333; border-radius: 8px;">
-            <p style="margin: 0; font-size: 14px;">Diagnostic Casque : <strong id="xr-status">Vérification...</strong></p>
-            <div id="xr-unsupported-msg" style="color: #FF6B6B; font-size: 14px; margin-top: 10px; display:none;">
-                ⚠️ Ce navigateur ne permet pas de lancer la réalité virtuelle. Ouvrez ce lien depuis le Meta Quest Browser.
-            </div>
-        </div>
-        <button id="start-xr-session-btn" style="padding: 15px; font-size: 18px;">Mettre le casque & Démarrer</button>
-    </div>
-    <canvas id="xr-canvas"></canvas>
-    <div id="exit-banner">Bouton Menu du Quest pour forcer l'arrêt de l'exercice.</div>
-    <script src="app.js"></script>
+    <h1>VertiBalance VR</h1>
+    <!-- Le paramètre ?v=1.0.3 force le Quest 2 à recharger le script sans utiliser son cache -->
+    <script src="app.js?v=1.0.3"></script>
 </body>
 </html>

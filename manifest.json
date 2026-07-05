@@ -1,13 +1,22 @@
 {
-  "name": "VertiBalance",
-  "short_name": "VertiBalance",
+  "name": "VertiBalance VR",
+  "short_name": "VertiBalance VR",
   "start_url": "index.html",
-  "display": "fullscreen",
+  "display": "standalone",
+  "background_color": "#0a1628",
+  "theme_color": "#00C9A7",
   "icons": [
     {
       "src": "icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
