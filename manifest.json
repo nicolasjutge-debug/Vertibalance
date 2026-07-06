@@ -1,0 +1,16 @@
+{
+  "name": "VertiBalance VR",
+  "short_name": "VertiBalance",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0A1628",
+  "theme_color": "#00C9A7",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

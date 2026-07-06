@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuration VertiBalance</title>
+    <style>
+        body { font-family: sans-serif; background: #0a1628; color: white; text-align: center; padding: 50px; }
+        button { background: #00C9A7; color: #0a1628; border: none; padding: 15px 30px; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        #res { margin-top: 20px; font-size: 20px; color: #00C9A7; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Générateur ID Patient</h1>
+    <button id="btn">Générer le profil</button>
+    <div id="res"></div>
+    <script>
+        document.getElementById("btn").onclick = () => {
+            fetch("https://api.jsonbin.io/v3/b", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-Master-Key": "$2a$10$37WLUrV6lE8yluKasDN/nuzRMkF98j/gvrCuEj5KwNr0AuZkTPHnG" },
+                body: JSON.stringify({ exercices: ["Statique", "Poids", "Cervicale"] })
+            })
+            .then(r => r.json())
+            .then(res => { document.getElementById("res").innerText = "ID généré : " + res.metadata.id; });
+        };
+    </script>
+</body>
+</html>
