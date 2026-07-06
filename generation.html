@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html><body><h1>Générateur ID</h1><button id="btn">Générer</button><div id="res"></div>
+<script>
+    document.getElementById("btn").onclick = () => {
+        fetch("https://api.jsonbin.io/v3/b", {
+            method: "POST",
+            headers: {"Content-Type": "application/json", "X-Master-Key": "$2a$10$37WLUrV6lE8yluKasDN/nuzRMkF98j/gvrCuEj5KwNr0AuZkTPHnG"},
+            body: JSON.stringify({ex: "test"})
+        })
+        .then(r => r.json())
+        .then(res => document.getElementById("res").innerText = res.metadata.id);
+    };
+</script></body></html>
