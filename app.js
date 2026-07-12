@@ -20,9 +20,20 @@ const LOCAL_KEY='vb_v45'; const CFG_KEY='vb_cfg_v45';
 const JBIN='https://api.jsonbin.io/v3';
 const BLIND_DUR=5; const NAUSEA_DELAY=0.4;
 
+/* ══════════════════════════════════════════════════════
+   CONFIGURATION JSONBIN
+   Saisir une seule fois sur iPhone → transféré automatiquement
+   sur le Quest via email/QR. Ne pas modifier si déjà configuré.
+   ══════════════════════════════════════════════════════ */
+const JSONBIN_API_KEY = '';  // ex: '$2a$10$xxxx...' — votre Master Key JSONBin
+const JSONBIN_BIN_ID  = '';  // Laissez vide → créé automatiquement au 1er exercice
+
 /* ── Config ── */
 let cfg={};
 try{cfg=JSON.parse(localStorage.getItem(CFG_KEY))||{};}catch(e){}
+// Injecter les constantes si cfg est vide (premier lancement Quest sans config)
+if(!cfg.apiKey && JSONBIN_API_KEY) cfg.apiKey = JSONBIN_API_KEY;
+if(!cfg.binId  && JSONBIN_BIN_ID)  cfg.binId  = JSONBIN_BIN_ID;
 function saveCfg(){localStorage.setItem(CFG_KEY,JSON.stringify(cfg));}
 
 /* ── URL params (QR / lien email) ── */
@@ -304,6 +315,55 @@ function showShareModal(){
   }
 }
 
+
+/* ════════════════════════════════════════
+   AUDIO GUIDE — Web Speech API (TTS natif)
+   Aucune dépendance, fonctionne sur Quest Browser et Safari.
+   Pour remplacer par des fichiers MP3 : modifier AUDIO_FILES ci-dessous
+   et appeler playAudioFile(exerciseId) à la place de speakGuide().
+   ════════════════════════════════════════ */
+
+// Pour utiliser des fichiers audio à la place de la synthèse vocale :
+// const AUDIO_FILES = { 'gaze-fixed': 'audio/gaze-fixed.mp3', ... };
+// function playAudioFile(id){ new Audio(AUDIO_FILES[id])?.play(); }
+
+const AUDIO_GUIDES = {
+  'gaze-fixed':    "Exercice de stabilisation du regard. Gardez les yeux fixés sur la sphère turquoise devant vous. Tournez doucement la tête de gauche à droite, en maintenant votre regard sur la cible. Cet exercice entraîne votre réflexe vestibulo-oculaire.",
+  'gaze-moving':   "Exercice de poursuite oculaire. Suivez la sphère violette du regard, sans bouger la tête dans un premier temps. Puis accompagnez le mouvement avec de légers déplacements de tête. Respirez régulièrement.",
+  'optic-flow':    "Exercice de désensibilisation au flux optique. L'environnement va défiler autour de vous. Restez immobile, les pieds bien ancrés au sol. Si vous ressentez un malaise, fixez le point central. Respirez lentement et profondément.",
+  'head-rotation': "Exercice de rotations de tête guidées. Des cibles lumineuses vont s'allumer successivement. Tournez la tête vers chaque cible dès qu'elle apparaît, en gardant le corps stable. Mouvement de tête uniquement.",
+  'balance-scene': "Exercice d'équilibre en environnement dynamique. Des formes vont bouger autour de vous. Maintenez votre équilibre, pieds à la largeur des épaules. Fixez le point central si vous vous sentez instable."
+};
+
+let ttsActive = false;
+let ttsUtterance = null;
+
+function speakGuide(exerciseId) {
+  if(!window.speechSynthesis) return;
+  const text = AUDIO_GUIDES[exerciseId];
+  if(!text) return;
+  stopGuide();
+  ttsUtterance = new SpeechSynthesisUtterance(text);
+  ttsUtterance.lang = 'fr-FR';
+  ttsUtterance.rate = 0.9;
+  ttsUtterance.pitch = 1.0;
+  ttsUtterance.volume = 1.0;
+  ttsUtterance.onstart  = () => { ttsActive=true;  updateAudioBtn(exerciseId, true);  };
+  ttsUtterance.onend    = () => { ttsActive=false; updateAudioBtn(exerciseId, false); };
+  ttsUtterance.onerror  = () => { ttsActive=false; updateAudioBtn(exerciseId, false); };
+  window.speechSynthesis.speak(ttsUtterance);
+}
+
+function stopGuide() {
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  ttsActive = false;
+}
+
+function updateAudioBtn(exerciseId, playing) {
+  const btn = document.querySelector(`[data-audio-id="${exerciseId}"]`);
+  if(btn) btn.textContent = playing ? '⏹ Stop' : '🔊 Guide';
+}
+
 /* ════════════════════════════════════════
    DASHBOARD
    ════════════════════════════════════════ */
@@ -341,6 +401,17 @@ function renderExerciseList(){
         <div class="ex-badge ${st==='done'?'termine':st==='active'?'encours':'attente'}">
           ${st==='done'?'Terminé':st==='active'?'En cours':'À venir'}</div>
       </div>`;
+    // Bouton guide audio sur chaque exercice
+    const audioBtn = document.createElement('button');
+    audioBtn.className='ex-audio-btn';
+    audioBtn.setAttribute('data-audio-id', ex.id);
+    audioBtn.textContent='🔊 Guide';
+    audioBtn.addEventListener('click', e=>{
+      e.stopPropagation();
+      if(ttsActive){ stopGuide(); return; }
+      speakGuide(ex.id);
+    });
+    item.querySelector('.ex-meta').appendChild(audioBtn);
     item.addEventListener('click',()=>{if(st!=='done')launchExercise(i);});
     list.appendChild(item);
   });
@@ -410,6 +481,18 @@ function renderHistory(){
 
 /* ── Navigation ── */
 $('open-config-from-dash').addEventListener('click',()=>{renderConfig();showScreen('config');});
+
+/* RAZ complète des séances */
+$('raz-btn').addEventListener('click',()=>{
+  if(!confirm('Remettre toutes les séances à zéro ? Cette action est irréversible.')) return;
+  store.sessions = [];
+  currentSession  = emptySession(1);
+  exerciseStatus  = EXERCISES.map(()=>'pending');
+  localStorage.removeItem(LOCAL_KEY);
+  saveStore(); // efface aussi le cloud
+  renderDashboard();
+  showNotice('Toutes les séances ont été réinitialisées');
+});
 $('back-to-dashboard').addEventListener('click',()=>showScreen('dashboard'));
 $('export-btn').addEventListener('click',exportJSON);
 $('export-btn-bottom').addEventListener('click',exportJSON);
@@ -682,6 +765,11 @@ function createRuntime(ex,sc){
    INIT
    ════════════════════════════════════════ */
 async function init(){
+  // Vérification ressources CDN (anti-404) — fallback silencieux
+  if(typeof THREE === 'undefined'){
+    console.error('Three.js non chargé — vérifiez la connexion internet');
+    showNotice('Three.js non chargé. Vérifiez votre connexion.','red');
+  }
   const fromQR=applyURLParams();
   await loadStore();
   recoverSnapshot();
